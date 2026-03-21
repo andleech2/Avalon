@@ -391,7 +391,6 @@ const STEP_LABELS = {
 
 // type:"browser"=Web Speech API   type:"gt"=Google Translate TTS
 const VOICE_PRESETS = [
-  {id:"gt",       type:"gt",      emoji:"🔵", name:"Google Voice",  desc:"Google Translate TTS · No account"},
   {id:"herald",   type:"browser", emoji:"📯", name:"The Herald",    desc:"Authoritative · Browser",  rate:1.00, pitch:0.70, hints:["google uk english male","daniel","george","james"]},
   {id:"vampire",  type:"browser", emoji:"🧛", name:"The Vampire",   desc:"Deep & dark · Browser",    rate:0.92, pitch:0.45, hints:["google uk english male","daniel","george","david"]},
   {id:"sorcerer", type:"browser", emoji:"🧙", name:"The Sorcerer",  desc:"Mysterious · Browser",     rate:0.85, pitch:0.55, hints:["google uk english male","daniel","george","david"]},
@@ -477,18 +476,6 @@ function stopAll() {
   document.querySelectorAll(".preview-btn").forEach(b => { b.textContent = "▶ Preview"; b.classList.remove("playing"); });
 }
 
-function gtUrl(text) {
-  return "https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=" + encodeURIComponent(text);
-}
-
-function playAudioUrl(url, onDone) {
-  const audio = new Audio(url);
-  currentAudio = audio;
-  audio.onended = () => { currentAudio = null; if(onDone) onDone(); };
-  audio.onerror = () => { currentAudio = null; if(onDone) onDone(true); };
-  audio.play().catch(() => { if(onDone) onDone(true); });
-}
-
 function previewVoice(id) {
   const preset = VOICE_PRESETS.find(p => p.id === id);
   if (!preset) return;
@@ -498,9 +485,7 @@ function previewVoice(id) {
   btn.textContent = "■ Stop"; btn.classList.add("playing");
   const done = () => { btn.textContent = "▶ Preview"; btn.classList.remove("playing"); };
 
-  if (preset.type === "gt") {
-    playAudioUrl(gtUrl(PREVIEW_TEXT), done);
-  } else {
+  if (true) {
     if (!synth) return;
     const utt = new SpeechSynthesisUtterance(PREVIEW_TEXT);
     utt.rate = preset.rate; utt.pitch = preset.pitch; utt.volume = 1;
@@ -665,14 +650,7 @@ function speakStep(idx) {
 
   const preset = VOICE_PRESETS.find(p => p.id === selectedVoiceId) || VOICE_PRESETS[0];
 
-  if (preset.type === "gt") {
-    setSpeaking(true);
-    playAudioUrl(gtUrl(step.text), (err) => {
-      setSpeaking(false);
-      if (err) { document.getElementById("voice-error-msg").classList.remove("hidden"); return; }
-      afterSpoken(step, idx);
-    });
-  } else {
+  if (true) {
     if (!synth) { document.getElementById("voice-error-msg").classList.remove("hidden"); return; }
     synth.cancel();
     const utt = new SpeechSynthesisUtterance(step.text);
