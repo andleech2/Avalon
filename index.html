@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Avalon · Night Phase</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0608;
+      min-height: 100vh;
+    }
+
+    .avalon-root {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 0%, #1a0a14 0%, #0a0608 60%);
+      color: #e8d5b0;
+      font-family: 'Crimson Pro', Georgia, serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avalon-root::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 80%, rgba(139,0,0,0.06) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(100,60,20,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .sigil {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.6;
+      letter-spacing: 0.3em;
+    }
+
+    h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      font-weight: 700;
+      color: #c8a96e;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 40px rgba(200,169,110,0.4);
+      text-align: center;
+      margin-bottom: 0.3rem;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #7a6a50;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    .divider {
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #c8a96e55, transparent);
+      margin: 0 auto 2rem;
+    }
+
+    .screen { width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .screen.hidden { display: none; }
+
+    /* PLAYER COUNT */
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      max-width: 360px;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .player-btn {
+      background: rgba(200,169,110,0.06);
+      border: 1px solid rgba(200,169,110,0.2);
+      color: #c8a96e;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.5rem;
+      padding: 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .player-btn:hover {
+      background: rgba(200,169,110,0.15);
+      border-color: rgba(200,169,110,0.5);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(200,169,110,0.15);
+    }
+
+    .player-btn .pcount { display: block; font-size: 1.5rem; }
+    .player-btn .plabel { display: block; font-family: 'Crimson Pro', serif; font-size: 0.7rem; letter-spacing: 0.15em; opacity: 0.6; margin-top: 2px; }
+
+    /* CARD SELECTION */
+    .screen-label {
+      font-size: 0.8rem;
+      color: #7a6a50;
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .card-section {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+    }
+
+    .good-title { color: #7ecbff; }
+    .evil-title { color: #ff6b6b; }
+
+    .section-count {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      letter-spacing: 0.1em;
+    }
+
+    .good-count { background: rgba(126,203,255,0.1); color: #7ecbff; border: 1px solid rgba(126,203,255,0.2); }
+    .evil-count { background: rgba(255,107,107,0.1); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.2); }
+
+    .role-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      margin-bottom: 0.4rem;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .role-card.good { background: rgba(126,203,255,0.04); }
+    .role-card.evil { background: rgba(255,107,107,0.04); }
+    .role-card.good.active { background: rgba(126,203,255,0.1); border-color: rgba(126,203,255,0.3); }
+    .role-card.evil.active { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.3); }
+    .role-card.locked { opacity: 0.6; cursor: default; }
+
+    .role-checkbox {
+      width: 18px; height: 18px;
+      border-radius: 3px;
+      border: 1.5px solid;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+      transition: all 0.15s;
+    }
+
+    .good .role-checkbox { border-color: #7ecbff44; color: #7ecbff; }
+    .evil .role-checkbox { border-color: #ff6b6b44; color: #ff6b6b; }
+    .good.active .role-checkbox { border-color: #7ecbff; background: #7ecbff22; }
+    .evil.active .role-checkbox { border-color: #ff6b6b; background: #ff6b6b22; }
+
+    .role-info { flex: 1; }
+    .role-name { font-family: 'Cinzel Decorative', serif; font-size: 0.8rem; color: #e8d5b0; }
+    .role-desc { font-size: 0.75rem; color: #7a6a50; font-style: italic; margin-top: 1px; }
+
+    .role-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      padding: 1px 5px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+    .tag-required { background: rgba(200,169,110,0.15); color: #c8a96e; }
+    .tag-auto { background: rgba(120,120,120,0.15); color: #888; }
+
+    .ratio-bar {
+      max-width: 500px;
+      width: 100%;
+      margin-bottom: 1.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .ratio-ok { color: #6dbb8a; }
+    .ratio-bad { color: #ff6b6b; }
+
+    /* BUTTONS */
+    .btn-primary {
+      background: linear-gradient(135deg, #8b6914, #c8a96e, #8b6914);
+      background-size: 200% 200%;
+      border: none;
+      color: #0a0608;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.85rem;
+      padding: 0.9rem 2.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      transition: all 0.3s;
+      animation: shimmer 3s ease infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 25px rgba(200,169,110,0.35);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      animation: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(200,169,110,0.2);
+      color: #7a6a50;
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.85rem;
+      padding: 0.6rem 1.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+      margin-top: 0.75rem;
+    }
+
+    .btn-ghost:hover { color: #c8a96e; border-color: rgba(200,169,110,0.4); }
+
+    /* NIGHT PHASE */
+    .night-screen {
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .step-indicator {
+      display: flex;
+      gap: 0.4rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .step-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(200,169,110,0.2);
+      transition: all 0.3s;
+    }
+
+    .step-dot.done { background: rgba(200,169,110,0.5); }
+    .step-dot.current { background: #c8a96e; box-shadow: 0 0 8px rgba(200,169,110,0.6); width: 18px; border-radius: 3px; }
+
+    .narration-box {
+      background: rgba(200,169,110,0.04);
+      border: 1px solid rgba(200,169,110,0.15);
+      border-radius: 6px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      min-height: 160px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .narration-text {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      line-height: 1.8;
+      font-style: italic;
+      color: #e8d5b0;
+      text-align: center;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .speaking-indicator {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 0.75rem;
+      display: flex;
+      gap: 3px;
+      align-items: flex-end;
+    }
+
+    .speaking-bar {
+      width: 3px;
+      background: #c8a96e;
+      border-radius: 2px;
+      opacity: 0;
+    }
+
+    .speaking-indicator.active .speaking-bar {
+      animation: speakPulse 0.8s ease-in-out infinite alternate;
+      opacity: 0.7;
+    }
+
+    .speaking-bar:nth-child(1) { height: 6px;  animation-delay: 0s; }
+    .speaking-bar:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+    .speaking-bar:nth-child(3) { height: 8px;  animation-delay: 0.3s; }
+    .speaking-bar:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+    .speaking-bar:nth-child(5) { height: 6px;  animation-delay: 0.25s; }
+
+    @keyframes speakPulse {
+      from { transform: scaleY(0.4); }
+      to   { transform: scaleY(1); }
+    }
+
+    .step-label {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.7rem;
+      color: #7a6a50;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .timer-bar-wrap {
+      width: 100%;
+      height: 2px;
+      background: rgba(200,169,110,0.1);
+      border-radius: 1px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .timer-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #c8a96e, #ff9f5a);
+      border-radius: 1px;
+      transition: width 0.1s linear;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .voice-error {
+      font-size: 0.75rem;
+      color: #ff9f5a;
+      margin-bottom: 0.75rem;
+      font-style: italic;
+    }
+
+    /* DONE */
+    .done-screen {
+      text-align: center;
+      animation: fadeIn 0.8s ease forwards;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .done-icon  { font-size: 3rem; margin-bottom: 1rem; opacity: 0.7; }
+    .done-title { font-family: 'Cinzel Decorative', serif; font-size: 1.4rem; color: #c8a96e; margin-bottom: 0.5rem; }
+    .done-sub   { font-size: 0.9rem; color: #7a6a50; font-style: italic; margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+<div class="avalon-root">
+  <div class="sigil">⚔ ✦ ⚔</div>
+  <h1>The Resistance</h1>
+  <div class="subtitle">Avalon · Night Phase</div>
+  <div class="divider"></div>
+
+  <!-- PLAYER COUNT SCREEN -->
+  <div id="screen-players" class="screen">
+    <p class="screen-label">How many players?</p>
+    <div class="player-grid">
+      <button class="player-btn" onclick="choosePlayers(5)"><span class="pcount">5</span><span class="plabel">players</span></button>
+      <button class="player-btn" onclick="choosePlayers(6)"><span class="pcount">6</span><span class="plabel">players</span></button>
+      <button class="player-btn" onclick="choosePlayers(7)"><span class="pcount">7</span><span class="plabel">players</span></button>
+      <button class="player-btn" onclick="choosePlayers(8)"><span class="pcount">8</span><span class="plabel">players</span></button>
+      <button class="player-btn" onclick="choosePlayers(9)"><span class="pcount">9</span><span class="plabel">players</span></button>
+      <button class="player-btn" onclick="choosePlayers(10)"><span class="pcount">10</span><span class="plabel">players</span></button>
+    </div>
+  </div>
+
+  <!-- CARD SELECTION SCREEN -->
+  <div id="screen-cards" class="screen hidden">
+    <p class="screen-label" id="cards-label"></p>
+
+    <div class="card-section">
+      <div class="section-header">
+        <span class="section-title good-title">Servants of Arthur</span>
+        <span class="section-count good-count" id="good-count-badge">0 / 0</span>
+      </div>
+      <div id="good-roles-list"></div>
+    </div>
+
+    <div class="card-section">
+      <div class="section-header">
+        <span class="section-title evil-title">Minions of Mordred</span>
+        <span class="section-count evil-count" id="evil-count-badge">0 / 0</span>
+      </div>
+      <div id="evil-roles-list"></div>
+    </div>
+
+    <div class="ratio-bar">
+      <span>Good: <b id="ratio-good">0</b> / <span id="ratio-good-max">0</span></span>
+      <span id="ratio-status" class="ratio-bad">⚠ Adjust roles</span>
+      <span>Evil: <b id="ratio-evil">0</b> / <span id="ratio-evil-max">0</span></span>
+    </div>
+
+    <button class="btn-primary" id="begin-btn" disabled onclick="startNight()">Begin the Night</button>
+    <button class="btn-ghost" onclick="goBack()">← Change Players</button>
+  </div>
+
+  <!-- NIGHT SCREEN -->
+  <div id="screen-night" class="screen hidden">
+    <div class="night-screen">
+      <div class="step-indicator" id="step-dots"></div>
+      <div class="step-label" id="step-label"></div>
+      <div class="narration-box">
+        <p class="narration-text" id="narration-text"></p>
+        <div class="speaking-indicator" id="speaking-indicator">
+          <div class="speaking-bar"></div>
+          <div class="speaking-bar"></div>
+          <div class="speaking-bar"></div>
+          <div class="speaking-bar"></div>
+          <div class="speaking-bar"></div>
+        </div>
+      </div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar" style="width:100%"></div></div>
+      <div id="voice-error-msg" class="voice-error hidden">⚠ Speech unavailable — read the text aloud</div>
+      <div class="btn-row">
+        <button class="btn-ghost" onclick="replayStep()">↺ Replay</button>
+        <button class="btn-primary" id="next-btn" onclick="skipStep()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONE SCREEN -->
+  <div id="screen-done" class="screen hidden">
+    <div class="done-screen">
+      <div class="done-icon">🌅</div>
+      <div class="done-title">The Kingdom Wakes</div>
+      <div class="done-sub">The night is over. Begin your quest.</div>
+      <button class="btn-primary" onclick="restart()">New Game</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const RATIOS = { 5:{g:3,e:2}, 6:{g:4,e:2}, 7:{g:4,e:3}, 8:{g:5,e:3}, 9:{g:6,e:3}, 10:{g:6,e:4} };
+
+const GOOD_ROLES = [
+  { id:"merlin",   name:"Merlin",          required:true,  desc:"Knows all evil except Mordred" },
+  { id:"percival", name:"Percival",         required:false, desc:"Sees Merlin (and Morgana if in play)" },
+  { id:"loyal1",   name:"Loyal Servant",    required:false, generic:true },
+  { id:"loyal2",   name:"Loyal Servant",    required:false, generic:true },
+  { id:"loyal3",   name:"Loyal Servant",    required:false, generic:true },
+  { id:"loyal4",   name:"Loyal Servant",    required:false, generic:true },
+  { id:"loyal5",   name:"Loyal Servant",    required:false, generic:true },
+];
+
+const EVIL_ROLES = [
+  { id:"assassin", name:"Assassin",         required:true,  desc:"Attempts to kill Merlin at end" },
+  { id:"morgana",  name:"Morgana",           required:false, desc:"Appears as Merlin to Percival" },
+  { id:"mordred",  name:"Mordred",           required:false, desc:"Hidden from Merlin" },
+  { id:"oberon",   name:"Oberon",            required:false, desc:"Unknown to evil, doesn't see them" },
+  { id:"minion1",  name:"Minion of Mordred", required:false, generic:true },
+  { id:"minion2",  name:"Minion of Mordred", required:false, generic:true },
+  { id:"minion3",  name:"Minion of Mordred", required:false, generic:true },
+];
+
+const STEP_LABELS = {
+  start:"Prepare", minions_open:"Minions Awaken", minions_thumb:"Signal Merlin",
+  merlin_open:"Merlin Sees", merlin_close:"Eyes Shut", percival_thumbs:"Guide Percival",
+  percival_open:"Percival Sees", percival_close:"Rest", wake:"Dawn"
+};
+
+let playerCount = 0;
+let selected = new Set();
+let script = [];
+let stepIdx = 0;
+let timerRAF = null;
+let synth = window.speechSynthesis;
+
+// ── SCREENS ──────────────────────────────────────────────────────────
+function showScreen(id) {
+  ["players","cards","night","done"].forEach(s => {
+    document.getElementById("screen-"+s).classList.toggle("hidden", s !== id);
+  });
+}
+
+// ── PLAYER SELECTION ─────────────────────────────────────────────────
+function choosePlayers(n) {
+  playerCount = n;
+  const ratio = RATIOS[n];
+  selected = new Set(["merlin","assassin"]);
+  let goodNeeded = ratio.g - 1; // merlin already counted
+  let evilNeeded = ratio.e - 1; // assassin already counted
+  for (let i = 1; i <= 5 && goodNeeded > 0; i++) { selected.add("loyal"+i); goodNeeded--; }
+  for (let i = 1; i <= 3 && evilNeeded > 0; i++) { selected.add("minion"+i); evilNeeded--; }
+  document.getElementById("cards-label").textContent = `${n} players · Choose your cards`;
+  renderCards();
+  showScreen("cards");
+}
+
+function goBack() { showScreen("players"); }
+
+// ── CARD RENDERING ───────────────────────────────────────────────────
+function renderCards() {
+  renderRoleList("good-roles-list", GOOD_ROLES, "good");
+  renderRoleList("evil-roles-list", EVIL_ROLES, "evil");
+  updateCounts();
+}
+
+function renderRoleList(containerId, roles, side) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  roles.forEach(role => {
+    if (role.generic && !selected.has(role.id)) return;
+    const active = selected.has(role.id);
+    const locked = role.required || role.generic;
+    const div = document.createElement("div");
+    div.className = `role-card ${side}${active?" active":""}${locked?" locked":""}`;
+    div.dataset.id = role.id;
+    if (!locked) div.onclick = () => toggleRole(role);
+
+    let tag = "";
+    if (role.required) tag = `<span class="role-tag tag-required">required</span>`;
+    else if (role.generic) tag = `<span class="role-tag tag-auto">auto</span>`;
+
+    div.innerHTML = `
+      <div class="role-checkbox">${active?"✓":""}</div>
+      <div class="role-info">
+        <div class="role-name">${role.name}</div>
+        ${role.desc ? `<div class="role-desc">${role.desc}</div>` : ""}
+      </div>
+      ${tag}
+    `;
+    container.appendChild(div);
+  });
+}
+
+function toggleRole(role) {
+  const isGood = GOOD_ROLES.find(r => r.id === role.id);
+  const pool = isGood ? GOOD_ROLES : EVIL_ROLES;
+  if (selected.has(role.id)) {
+    selected.delete(role.id);
+    const generic = pool.find(r => r.generic && !selected.has(r.id));
+    if (generic) selected.add(generic.id);
+  } else {
+    const generic = [...pool].reverse().find(r => r.generic && selected.has(r.id));
+    if (generic) selected.delete(generic.id);
+    selected.add(role.id);
+  }
+  renderCards();
+}
+
+function updateCounts() {
+  const ratio = RATIOS[playerCount];
+  const g = GOOD_ROLES.filter(r => selected.has(r.id)).length;
+  const e = EVIL_ROLES.filter(r => selected.has(r.id)).length;
+  const ok = g === ratio.g && e === ratio.e;
+
+  document.getElementById("good-count-badge").textContent = `${g} / ${ratio.g}`;
+  document.getElementById("evil-count-badge").textContent = `${e} / ${ratio.e}`;
+  document.getElementById("ratio-good").textContent = g;
+  document.getElementById("ratio-evil").textContent = e;
+  document.getElementById("ratio-good-max").textContent = ratio.g;
+  document.getElementById("ratio-evil-max").textContent = ratio.e;
+
+  const status = document.getElementById("ratio-status");
+  status.textContent = ok ? "✓ Balanced" : "⚠ Adjust roles";
+  status.className = ok ? "ratio-ok" : "ratio-bad";
+  document.getElementById("begin-btn").disabled = !ok;
+}
+
+// ── SCRIPT BUILDER ───────────────────────────────────────────────────
+function buildScript() {
+  const hasOberon   = selected.has("oberon");
+  const hasMordred  = selected.has("mordred");
+  const hasMorgana  = selected.has("morgana");
+  const hasPercival = selected.has("percival");
+  const steps = [];
+
+  steps.push({ id:"start", text:"Everyone, please close your eyes and extend your hand into a fist in front of you.", pause:3000 });
+
+  const evilEx = hasOberon ? ", not Oberon," : "";
+  steps.push({ id:"minions_open", text:`Minions of Mordred${evilEx} open your eyes and look around so that you know all agents of evil.`, pause:4000 });
+  steps.push({ id:"minions_thumb", text:"Minions of Mordred, extend your thumb so that Merlin can see the servants of evil.", pause:3000 });
+
+  const mordredNote = hasMordred ? " Remember, Mordred is hidden from your sight." : "";
+  steps.push({ id:"merlin_open", text:`Merlin, open your eyes and behold the agents of evil.${mordredNote}`, pause:5000 });
+  steps.push({ id:"merlin_close", text:"Minions of Mordred, put your thumbs away and close your eyes. Merlin, close your eyes.", pause:3000 });
+
+  if (hasPercival) {
+    const raisers = hasMorgana ? "Merlin and Morgana" : "Merlin";
+    const seeNote = hasMorgana ? "One is Merlin, one is Morgana — you must deduce which is which." : "Behold Merlin.";
+    steps.push({ id:"percival_thumbs", text:`${raisers}, extend your thumb so that Percival may find you.`, pause:3000 });
+    steps.push({ id:"percival_open",  text:`Percival, open your eyes. ${seeNote}`, pause:5000 });
+    steps.push({ id:"percival_close", text:`Percival, close your eyes. ${raisers}, put your thumb down.`, pause:3000 });
+  }
+
+  steps.push({ id:"wake", text:"Everyone, open your eyes. The quest begins. May the forces of good prevail.", pause:0 });
+  return steps;
+}
+
+// ── NIGHT PHASE ──────────────────────────────────────────────────────
+function startNight() {
+  script = buildScript();
+  stepIdx = 0;
+  showScreen("night");
+  renderDots();
+  speakStep(0);
+}
+
+function renderDots() {
+  const container = document.getElementById("step-dots");
+  container.innerHTML = "";
+  script.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "step-dot" + (i < stepIdx ? " done" : i === stepIdx ? " current" : "");
+    container.appendChild(d);
+  });
+}
+
+function updateDots() {
+  const dots = document.querySelectorAll(".step-dot");
+  dots.forEach((d, i) => {
+    d.className = "step-dot" + (i < stepIdx ? " done" : i === stepIdx ? " current" : "");
+  });
+}
+
+function speakStep(idx) {
+  if (idx >= script.length) { showScreen("done"); return; }
+  stepIdx = idx;
+  updateDots();
+
+  const step = script[idx];
+  const label = document.getElementById("step-label");
+  label.textContent = STEP_LABELS[step.id] || "";
+
+  // refresh narration text with fade
+  const box = document.getElementById("narration-text");
+  box.style.animation = "none";
+  box.textContent = `"${step.text}"`;
+  void box.offsetWidth;
+  box.style.animation = "fadeIn 0.6s ease forwards";
+
+  // update next button
+  const nextBtn = document.getElementById("next-btn");
+  nextBtn.textContent = idx < script.length - 1 ? "Next →" : "Finish";
+
+  // reset timer bar
+  document.getElementById("timer-bar").style.width = "100%";
+
+  setSpeaking(false);
+
+  if (!synth) { document.getElementById("voice-error-msg").classList.remove("hidden"); return; }
+
+  synth.cancel();
+  const utt = new SpeechSynthesisUtterance(step.text);
+  utt.rate = 1.0;
+  utt.pitch = 0.45;
+  utt.volume = 1;
+
+  const voices = synth.getVoices();
+  // UK English male voices tend to sound smoother and deeper
+  const pref =
+    voices.find(v => /google uk english male/i.test(v.name)) ||
+    voices.find(v => /daniel/i.test(v.name) && /en/i.test(v.lang)) ||
+    voices.find(v => /george/i.test(v.name) && /en/i.test(v.lang)) ||
+    voices.find(v => /david/i.test(v.name) && /en/i.test(v.lang)) ||
+    voices.find(v => /male/i.test(v.name) && /en.*gb/i.test(v.lang)) ||
+    voices.find(v => /male/i.test(v.name) && /en/i.test(v.lang)) ||
+    voices.find(v => /en/i.test(v.lang));
+  if (pref) utt.voice = pref;
+
+  utt.onstart = () => setSpeaking(true);
+  utt.onerror = () => {
+    setSpeaking(false);
+    document.getElementById("voice-error-msg").classList.remove("hidden");
+  };
+  utt.onend = () => {
+    setSpeaking(false);
+    if (step.pause > 0) {
+      const start = Date.now();
+      const tick = () => {
+        const elapsed = Date.now() - start;
+        const pct = Math.max(0, 100 - (elapsed / step.pause) * 100);
+        document.getElementById("timer-bar").style.width = pct + "%";
+        if (elapsed < step.pause) {
+          timerRAF = requestAnimationFrame(tick);
+        } else {
+          speakStep(idx + 1);
+        }
+      };
+      timerRAF = requestAnimationFrame(tick);
+    } else {
+      showScreen("done");
+    }
+  };
+
+  synth.speak(utt);
+}
+
+function setSpeaking(val) {
+  document.getElementById("speaking-indicator").classList.toggle("active", val);
+}
+
+function skipStep() {
+  synth && synth.cancel();
+  cancelAnimationFrame(timerRAF);
+  setSpeaking(false);
+  speakStep(stepIdx + 1);
+}
+
+function replayStep() {
+  synth && synth.cancel();
+  cancelAnimationFrame(timerRAF);
+  setSpeaking(false);
+  speakStep(stepIdx);
+}
+
+function restart() {
+  synth && synth.cancel();
+  cancelAnimationFrame(timerRAF);
+  showScreen("players");
+}
+
+// Load voices async (Chrome needs this)
+if (synth) {
+  synth.onvoiceschanged = () => {};
+  synth.getVoices();
+}
+</script>
+</body>
+</html>
