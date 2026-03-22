@@ -576,13 +576,13 @@ function buildScript() {
         hasMorgana=selected.has("morgana"), hasPercival=selected.has("percival");
   const s = [];
   s.push({id:"start", text:"Close your eyes. All of you. And extend your fist before you.", pause:3000});
-  const ex = hasOberon?", all but Oberon,":"";
-  s.push({id:"minions_open", text:`Minions of Mordred${ex}... open your eyes. Look around. Know your allies in darkness.`, pause:4000});
+  const oberonNote = hasOberon ? " Oberon, keep your eyes closed and do not raise your thumb." : "";
+  s.push({id:"minions_open", text:`Minions of Mordred, open your eyes. Look around. Know your fellow agents of evil.${oberonNote}`, pause:4000});
   s.push({id:"minions_close_look", text:"Now close your eyes.", pause:2500});
-  s.push({id:"minions_thumb", text:"Raise your thumb. Let Merlin see who serves the darkness.", pause:3000});
-  const mn = hasMordred?" Mordred walks among them, hidden even from you.":"";
-  s.push({id:"merlin_open", text:`Merlin. Open your eyes, and know your enemies.${mn}`, pause:5000});
-  s.push({id:"merlin_close", text:"Minions, lower your thumbs. Close your eyes. Merlin, close yours.", pause:3000});
+  s.push({id:"minions_thumb", text:"Raise your thumb so that Merlin may identify the agents of evil.", pause:3000});
+  const mn = hasMordred ? " Mordred is among the agents of evil, but remains hidden from your sight." : "";
+  s.push({id:"merlin_open", text:`Merlin. Open your eyes, and behold the agents of evil.${mn}`, pause:5000});
+  s.push({id:"merlin_close", text:"Agents of evil, lower your thumbs and close your eyes. Merlin, close yours.", pause:3000});
   if (hasPercival) {
     const r = hasMorgana?"Merlin and Morgana":"Merlin";
     const n = hasMorgana?"One is Merlin. One is Morgana. Choose wisely.":"There is Merlin.";
