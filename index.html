@@ -584,9 +584,9 @@ function buildScript() {
   if (oberonWarning) s.push(oberonWarning);
   s.push({id:"minions_open", text:"Agents of evil, open your eyes. Look around. Know your fellow agents of evil.", pause:4000});
   s.push({id:"minions_close_look", text:"Now close your eyes.", pause:2500});
-  s.push({id:"minions_thumb", text:"Agents of evil, raise your thumbs so that Merlin may identify you.", pause:3000});
-  const mn = hasMordred ? " Mordred is among the agents of evil, but remains hidden from your sight." : "";
-  s.push({id:"merlin_open", text:`Merlin. Open your eyes, and behold the agents of evil.${mn}`, pause:5000});
+  const mordredThumb = hasMordred ? " Mordred, keep your thumb down." : "";
+  s.push({id:"minions_thumb", text:`Agents of evil, raise your thumbs so that Merlin may identify you.${mordredThumb}`, pause:3000});
+  s.push({id:"merlin_open", text:`Merlin. Open your eyes, and behold the agents of evil.`, pause:5000});
   s.push({id:"merlin_close", text:"Agents of evil, lower your thumbs and close your eyes. Merlin, close yours.", pause:3000});
   if (hasPercival) {
     const r = hasMorgana?"Merlin and Morgana":"Merlin";
