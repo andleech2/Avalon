@@ -379,7 +379,7 @@ const EVIL_ROLES = [
 ];
 
 const STEP_LABELS = {
-  start:"Prepare", minions_open:"Minions Awaken", minions_close_look:"Eyes Down", minions_thumb:"Signal Merlin",
+  start:"Prepare", oberon_warning:"Oberon, Stay", minions_open:"Agents Awaken", minions_close_look:"Eyes Down", minions_thumb:"Signal Merlin",
   merlin_open:"Merlin Sees", merlin_close:"Eyes Shut", percival_thumbs:"Guide Percival",
   percival_open:"Percival Sees", percival_close:"Rest", wake:"Dawn"
 };
@@ -576,8 +576,9 @@ function buildScript() {
         hasMorgana=selected.has("morgana"), hasPercival=selected.has("percival");
   const s = [];
   s.push({id:"start", text:"Close your eyes. All of you. And extend your fist before you.", pause:3000});
-  const oberonNote = hasOberon ? " Oberon, keep your eyes closed and do not raise your thumb." : "";
-  s.push({id:"minions_open", text:`Minions of Mordred, open your eyes. Look around. Know your fellow agents of evil.${oberonNote}`, pause:4000});
+  const oberonWarning = hasOberon ? {id:"oberon_warning", text:"Oberon, keep your eyes closed throughout, and do not raise your thumb.", pause:2500} : null;
+  if (oberonWarning) s.push(oberonWarning);
+  s.push({id:"minions_open", text:"Agents of evil, open your eyes. Look around. Know your fellow agents of evil.", pause:4000});
   s.push({id:"minions_close_look", text:"Now close your eyes.", pause:2500});
   s.push({id:"minions_thumb", text:"Raise your thumb so that Merlin may identify the agents of evil.", pause:3000});
   const mn = hasMordred ? " Mordred is among the agents of evil, but remains hidden from your sight." : "";
