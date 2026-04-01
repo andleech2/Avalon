@@ -587,7 +587,7 @@ function buildScript() {
   const mordredThumb = hasMordred ? " Mordred, keep your thumb down." : "";
   s.push({id:"minions_thumb", text:`Agents of evil, raise your thumbs so that Merlin may identify you.${mordredThumb}`, pause:3000});
   s.push({id:"merlin_open", text:`Merlin. Open your eyes, and behold the agents of evil.`, pause:5000});
-  s.push({id:"merlin_close", text:"Agents of evil, lower your thumbs and close your eyes. Merlin, close yours.", pause:3000});
+  s.push({id:"merlin_close", text:"Agents of evil, lower your thumbs. Merlin, close your eyes.", pause:3000});
   if (hasPercival) {
     const r = hasMorgana?"Merlin and Morgana":"Merlin";
     const n = hasMorgana?"One is Merlin. One is Morgana. Choose wisely.":"There is Merlin.";
