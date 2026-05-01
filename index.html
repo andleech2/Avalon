@@ -292,7 +292,7 @@
     <p class="screen-label">Choose your narrator</p>
     <div class="voice-grid" id="voice-grid"></div>
     <button class="btn-primary" onclick="goToCards()">Continue →</button>
-    <button class="btn-ghost" onclick="showScreen('players')">← Back</button>
+    <button class="btn-ghost" onclick="showScreen('cards')">← Back</button>
   </div>
 
   <!-- CARD SELECTION -->
@@ -318,7 +318,7 @@
       <span>Evil: <b id="ratio-evil">0</b> / <span id="ratio-evil-max">0</span></span>
     </div>
     <button class="btn-primary" id="begin-btn" disabled onclick="startNight()">Start Narration</button>
-    <button class="btn-ghost" onclick="showScreen('voice')">← Change Voice</button>
+    <button class="btn-ghost" onclick="goToVoice()">🎙 Change Voice</button>
   </div>
 
   <!-- NIGHT PHASE -->
@@ -437,8 +437,8 @@ function choosePlayers(n) {
     selected.add("morgana");
   }
   loadVoices();
-  renderVoicePicker();
-  showScreen("voice");
+  renderCards();
+  showScreen("cards");
 }
 
 // ── VOICE PICKER ──────────────────────────────────────────────────────
@@ -498,6 +498,12 @@ function previewVoice(id) {
     utt.onend = utt.onerror = done;
     synth.speak(utt);
   }
+}
+
+function goToVoice() {
+  stopAll();
+  renderVoicePicker();
+  showScreen("voice");
 }
 
 function goToCards() {
@@ -603,7 +609,7 @@ function buildScript() {
     s.push({id:"percival_open",   text:`Percival. Open your eyes. ${n}`, pause:2500});
     s.push({id:"percival_close",  text:`Percival, close your eyes. ${r}, lower your thumb.`, pause:1500});
   }
-  s.push({id:"wake", text:"Everybody open your eyes. The quest begins. May the worthy prevail.", pause:0});
+  s.push({id:"wake", text:"Everybody open your eyes. The quest begins. May the worthy prevail... and conquer.", pause:0});
   return s;
 }
 
